@@ -231,6 +231,7 @@ var displayPlaceholders = function() {
   var gridCoords = gridCoordinates(objectCount, 60);
   for (var i = 0; i < objectCount; i++) {
     var placeholder = group.append("rect")
+        .attr("id", i)
         .attr("x", gridCoords[i].x-28)
         .attr("y", gridCoords[i].y-28)
         .attr("width", 56)
@@ -240,15 +241,24 @@ var displayPlaceholders = function() {
 
     placeholder.on("click",
         function() {
-          //check location of click to target
-          //if wrong, increase error count and redo condition
-          //if right, record time and clear screen, go to next block
+          console.log(this.id);
           d3.select("#placeholders").remove();
-          displayInstructions();
+          if ( this.id == ctx.targetIndex){
+            //record time
+            displayInstructions();
+          }
+          else{
+            //if wrong, increase error count and redo condition
+            displayShapes();
+          }
+          
+         
+          
         }
       );
 
   }
+
 }
 
 var keyListener = function(event) {
