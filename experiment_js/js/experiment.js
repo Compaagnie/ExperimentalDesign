@@ -139,6 +139,8 @@ var displayInstructions = function() {
 var displayShapes = function() {
   ctx.state = state.SHAPES;
 
+  const shadowIntensity = [0,0.5];
+
   var visualVariable = ctx.trials[ctx.cpt]["VV"];
   var oc = ctx.trials[ctx.cpt]["OC"];
   if(oc === "Small") {
@@ -159,7 +161,7 @@ var displayShapes = function() {
   // In my example, it means deciding on its size (large or small) and its color (light or dark)
   var randomNumber1 = Math.random();
   var randomNumber2 = Math.random();
-  var targetSize, targetColor;
+  var targetSize, targetColor, targetShadow, targetMotion;
   if(randomNumber1 > 0.5) {
     targetSize = 25; // target is large
   } else {
@@ -171,21 +173,39 @@ var displayShapes = function() {
     targetColor = "LightGray"; // target is light gray
   }
 
+  switch (visualVariable) {
+    case "shadow":
+      targetShadow = shadowIntensity[~~Math.random()*shadowIntensity.length];
+      break;
+    case "motion":
+      break;
+    default:
+      break;
+  }
+
   // 2. Set the visual appearance of all other objects now that the target appearance is decided
   // Here, we implement the case VV = "Size" so all other objects are large (resp. small) if target is small (resp. large) but have the same color as target.
   var objectsAppearance = [];
   for (var i = 0; i < objectCount-1; i++) {
+    objectsAppearance.push({
+      size: targetSize, 
+      color: targetColor, 
+      shadow: targetShadow*(-1)+1, 
+      motion: NONE
+    })
+    /*
     if(targetSize == 25) {
-      objectsAppearance.push({
-        size: 15,
-        color: targetColor
-      });
-    } else {
       objectsAppearance.push({
         size: 25,
         color: targetColor
       });
+    } else {
+      objectsAppearance.push({
+        size: 15,
+        color: targetColor
+      });
     }
+    */
   }
 
   // 3. Shuffle the list of objects (useful when there are variations regarding both visual variable) and add the target at a specific index
@@ -193,7 +213,7 @@ var displayShapes = function() {
   // draw a random index for the target
   ctx.targetIndex = Math.floor(Math.random()*objectCount);
   // and insert it at this specific index
-  objectsAppearance.splice(ctx.targetIndex, 0, {size:targetSize, color:targetColor});
+  objectsAppearance.splice(ctx.targetIndex, 0, {size:targetSize, color:targetColor, shadow:targetShadow, motion:targetMotion});
 
   // 4. We create actual SVG shapes and lay them out as a grid
   // compute coordinates for laying out objects as a grid
@@ -204,7 +224,7 @@ var displayShapes = function() {
       .attr("cx", gridCoords[i].x)
       .attr("cy", gridCoords[i].y)
       .attr("r", objectsAppearance[i].size)
-      .attr("fill", objectsAppearance[i].color);
+      .attr("fill", objectsAppearance[i].color)  
   }
 
 }
