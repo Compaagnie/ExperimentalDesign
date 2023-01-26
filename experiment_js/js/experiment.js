@@ -240,7 +240,11 @@ var displayPlaceholders = function() {
 
     placeholder.on("click",
         function() {
-          // TODO
+          //check location of click to target
+          //if wrong, increase error count and redo condition
+          //if right, record time and clear screen, go to next block
+          d3.select("#placeholders").remove();
+          displayInstructions();
         }
       );
 
@@ -253,10 +257,13 @@ var keyListener = function(event) {
   if(ctx.state == state.INSTRUCTIONS && event.code == "Enter") {
     d3.select("#instructions").remove();
     displayShapes();
+  } else if(ctx.state == state.SHAPES && event.code == "Space") {
+    d3.select("#shapes").remove();
+    displayPlaceholders();
   }
 
-
 }
+
 
 var downloadLogs = function(event) {
   event.preventDefault();
