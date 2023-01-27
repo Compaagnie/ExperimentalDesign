@@ -279,7 +279,7 @@ var displayShapes = function() {
         .attr("cx", gridCoords[i].x)
         .attr("cy", gridCoords[i].y)
         .attr("r", objectsAppearance[i].size)
-        .attr("fill", objectsAppearance[i].color)
+        .attr("fill", objectsAppearance[i].color);
     }  else {
       group.append("circle")
       .attr("cx", gridCoords[i].x)
@@ -293,27 +293,27 @@ var displayShapes = function() {
     console.log("in motion loop");
     const motion = () => {
       let circles = svgElement.selectAll('[id*=shapes');
-          // d3.select(circles[i])
-        circles
-          .transition()
-          .duration(100)
-          .attrTween('transform', tween(1))
-          .delay(20)
-          .transition()
-          .duration(100)
-          .attrTween('transform',tween(0))
-          .on('end', motion);
-        }
-      motion();
-      function tween(direction) {
-        const circle=this;
-        if (!(this instanceof Node)) {
-            return;
-        }
-        if(direction>0) return d3.interpolateString('translate(' + (circle.cy + circle.motion) + ')')
-        else return d3.interpolateString('translate(' + (circle.cy - circle.motion) + ')');
+      // d3.select(circles[i])
+      circles
+        .transition()
+        .duration(100)
+        .attrTween('transform', tween(1))
+        .delay(20)
+        .transition()
+        .duration(100)
+        .attrTween('transform',tween(0))
+        .on('end', motion);
     }
+    motion();
+    function tween(direction) {
+      const circle=this;
+      if (!(this instanceof Node)) {
+          return;
       }
+      if(direction>0) return d3.interpolateString('translate(' + (circle.cy + circle.motion) + ')')
+      else return d3.interpolateString('translate(' + (circle.cy - circle.motion) + ')');
+    }
+  }
 }
 
 var displayPlaceholders = function() {
