@@ -58,7 +58,6 @@ var loadData = function(svgEl){
         options.push(participant);
       }
     }
-
     var select = d3.select("#participantSel")
     select.selectAll("option")
       .data(options)
@@ -139,10 +138,13 @@ var displayInstructions = function() {
 
 var displayShapes = function() {
   ctx.state = state.SHAPES;
-
+  var shadowIndex =1;
+  var motionIndex =1;
   const shadowIntensity = [0,0.5];
+  const motionShift= [0,10];
 
   var visualVariable = ctx.trials[ctx.cpt]["VV"];
+  console.log(visualVariable);
   var oc = ctx.trials[ctx.cpt]["OC"];
   if(oc === "Low") {
     objectCount = 9;
@@ -213,24 +215,29 @@ var displayShapes = function() {
   switch (visualVariable) {
     case "Shadow":
       targetShadow = shadowIntensity[~~Math.random()*shadowIntensity.length];
+      shadowIndex=1;
+      motionIndex=0;
+      targetMotion=0;
       break;
     case "Motion":
+      targetShadow=0;
+      shadowIndex=0;
+      motionIndex=1;
+      targetMotion=motionShift[~~Math.random()*motionShift.length];
       break;
     case "Both":
       break;
     default:
       break;
   }
-  console.log(targetShadow);
   // 2. Set the visual appearance of all other objects now that the target appearance is decided
-  // Here, we implement the case VV = "Size" so all other objects are large (resp. small) if target is small (resp. large) but have the same color as target.
   var objectsAppearance = [];
   for (var i = 0; i < objectCount-1; i++) {
     objectsAppearance.push({
       size: targetSize, 
       color: targetColor, 
-      shadow: targetShadow*(-1)+shadowIntensity[1], 
-      motion: 0
+      shadow: targetShadow*(-1)+shadowIntensity[shadowIndex], 
+      motion: targetMotion*(-1)+motionShift[motionIndex]
     })
     /*
     if(targetSize == 25) {
@@ -267,7 +274,13 @@ var displayShapes = function() {
       .attr("r", objectsAppearance[i].size)
       .attr("fill", objectsAppearance[i].color)
       .attr("filter", "url(#dropshadow)");
-    } else {
+    } else if (objectsAppearance[i].motion == motionShift[1]){
+        group.append("circle")
+        .attr("cx", gridCoords[i].x)
+        .attr("cy", gridCoords[i].y)
+        .attr("r", objectsAppearance[i].size)
+        .attr("fill", objectsAppearance[i].color)
+    }  else {
       group.append("circle")
       .attr("cx", gridCoords[i].x)
       .attr("cy", gridCoords[i].y)
@@ -276,6 +289,31 @@ var displayShapes = function() {
     }
   }
 
+  if( visualVariable=="Motion"){
+    console.log("in motion loop");
+    const motion = () => {
+      let circles = svgElement.selectAll('[id*=shapes');
+          // d3.select(circles[i])
+        circles
+          .transition()
+          .duration(100)
+          .attrTween('transform', tween(1))
+          .delay(20)
+          .transition()
+          .duration(100)
+          .attrTween('transform',tween(0))
+          .on('end', motion);
+        }
+      motion();
+      function tween(direction) {
+        const circle=this;
+        if (!(this instanceof Node)) {
+            return;
+        }
+        if(direction>0) return d3.interpolateString('translate(' + (circle.cy + circle.motion) + ')')
+        else return d3.interpolateString('translate(' + (circle.cy - circle.motion) + ')');
+    }
+      }
 }
 
 var displayPlaceholders = function() {
@@ -466,15 +504,24 @@ var setParticipant = function(participantID) {
 
 function onchangeParticipant() {
   selectValue = d3.select("#participantSel").property("value");
+  d3.select("#shapes").remove();
+  d3.select("#placeholders").remove();
+  d3.select("#instructions").remove();
   setParticipant(selectValue);
 };
 
 function onchangeBlock() {
   selectValue = d3.select("#blockSel").property("value");
+  d3.select("#shapes").remove();
+  d3.select("#placeholders").remove();
+  d3.select("#instructions").remove();
   setBlock(selectValue);
 };
 
 function onchangeTrial() {
   selectValue = d3.select("#trialSel").property("value");
+  d3.select("#shapes").remove();
+  d3.select("#placeholders").remove();
+  d3.select("#instructions").remove();
   setTrial(selectValue);
 };
