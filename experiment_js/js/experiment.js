@@ -1,4 +1,4 @@
-var touchstone = 1;
+var touchstone = 2;
 
 var state = {
   NONE:0,
@@ -13,9 +13,9 @@ var ctx = {
 
   trials: [],
   participant: "",
-  startBlock: 0,
-  startTrial: 0,
-  cpt: 0,
+  startBlock: 1,
+  startTrial: 1,
+  cpt: 1,
 
   participantIndex:touchstone == 1 ? "Participant" : "ParticipantID",
   practiceIndex:"Practice",
@@ -42,12 +42,13 @@ var ctx = {
 
 var loadData = function(svgEl){
   // d3.csv parses a csv file...
-  d3.csv("experiment_touchstone"+touchstone+".csv").then(function(data){
+  //d3.csv("experiment_touchstone"+touchstone+".csv")
+  d3.csv("preattentive_variables"+touchstone+".csv").then(function(data){
     // ... and turns it into a 2-dimensional array where each line is an array indexed by the column headers
     // for example, data[2]["OC"] returns the value of OC in the 3rd line
     ctx.trials = data;
     // all trials for the whole experiment are stored in global variable ctx.trials
-
+    console.log(data);
     var participant = "";
     var options = [];
 
@@ -143,7 +144,7 @@ var displayShapes = function() {
 
   var visualVariable = ctx.trials[ctx.cpt]["VV"];
   var oc = ctx.trials[ctx.cpt]["OC"];
-  if(oc === "Small") {
+  if(oc === "Low") {
     objectCount = 9;
   } else if(oc === "Medium") {
     objectCount = 25;
@@ -153,6 +154,42 @@ var displayShapes = function() {
   console.log("display shapes for condition "+oc+","+visualVariable);
 
   var svgElement = d3.select("svg");
+
+  // filter stuff                       http://4waisenkinder.de/blog/2013/09/28/using-gradient-and-shadows-with-d3-dot-js/
+  /* For the shadow filter... */
+  // everything that will be referenced
+  // should be defined inside of a <defs> element ;)
+  var defs = svgElement.append( 'defs' );
+
+  // append filter element
+  var filter = defs.append( 'filter' )
+                  .attr( 'id', 'dropshadow' ) /// !!! important - define id to reference it later
+
+  // append gaussian blur to filter
+  filter.append( 'feGaussianBlur' )
+        .attr( 'in', 'SourceAlpha' )
+        .attr( 'stdDeviation', shadowIntensity[1] ) // !!! important parameter - blur
+        .attr( 'result', 'blur' );
+
+  // append offset filter to result of gaussion blur filter
+  filter.append( 'feOffset' )
+        .attr( 'in', 'blur' )
+        .attr( 'dx', 2 ) // !!! important parameter - x-offset
+        .attr( 'dy', 3 ) // !!! important parameter - y-offset
+        .attr( 'result', 'offsetBlur' );
+
+  // merge result with original image
+  var feMerge = filter.append( 'feMerge' );
+
+  // first layer result of blur and offset
+  feMerge.append( 'feMergeNode' )
+        .attr( 'in", "offsetBlur' )
+
+  // original image on top
+  feMerge.append( 'feMergeNode' )
+        .attr( 'in', 'SourceGraphic' );
+  // end filter stuff
+
   var group = svgElement.append("g")
   .attr("id", "shapes")
   .attr("transform", "translate(100,100)");
@@ -174,15 +211,17 @@ var displayShapes = function() {
   }
 
   switch (visualVariable) {
-    case "shadow":
+    case "Shadow":
       targetShadow = shadowIntensity[~~Math.random()*shadowIntensity.length];
       break;
-    case "motion":
+    case "Motion":
+      break;
+    case "Both":
       break;
     default:
       break;
   }
-
+  console.log(targetShadow);
   // 2. Set the visual appearance of all other objects now that the target appearance is decided
   // Here, we implement the case VV = "Size" so all other objects are large (resp. small) if target is small (resp. large) but have the same color as target.
   var objectsAppearance = [];
@@ -190,8 +229,8 @@ var displayShapes = function() {
     objectsAppearance.push({
       size: targetSize, 
       color: targetColor, 
-      shadow: targetShadow*(-1)+1, 
-      motion: NONE
+      shadow: targetShadow*(-1)+shadowIntensity[1], 
+      motion: 0
     })
     /*
     if(targetSize == 25) {
@@ -220,11 +259,21 @@ var displayShapes = function() {
   var gridCoords = gridCoordinates(objectCount, 60);
   // display all objects by adding actual SVG shapes
   for (var i = 0; i < objectCount; i++) {
+    console.log(objectsAppearance[i].shadow);
+    if (objectsAppearance[i].shadow == shadowIntensity[1]){
       group.append("circle")
       .attr("cx", gridCoords[i].x)
       .attr("cy", gridCoords[i].y)
       .attr("r", objectsAppearance[i].size)
-      .attr("fill", objectsAppearance[i].color)  
+      .attr("fill", objectsAppearance[i].color)
+      .attr("filter", "url(#dropshadow)");
+    } else {
+      group.append("circle")
+      .attr("cx", gridCoords[i].x)
+      .attr("cy", gridCoords[i].y)
+      .attr("r", objectsAppearance[i].size)
+      .attr("fill", objectsAppearance[i].color);
+    }
   }
 
 }
