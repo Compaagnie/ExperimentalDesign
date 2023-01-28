@@ -266,7 +266,7 @@ var displayShapes = function() {
   var gridCoords = gridCoordinates(objectCount, 60);
   // display all objects by adding actual SVG shapes
   for (var i = 0; i < objectCount; i++) {
-    console.log(objectsAppearance[i].shadow);
+    // console.log(objectsAppearance[i].shadow);
     if (objectsAppearance[i].shadow == shadowIntensity[1]){
       group.append("circle")
       .attr("cx", gridCoords[i].x)
@@ -276,6 +276,7 @@ var displayShapes = function() {
       .attr("filter", "url(#dropshadow)");
     } else if (objectsAppearance[i].motion == motionShift[1]){
         group.append("circle")
+        .attr("id", "circleShape")
         .attr("cx", gridCoords[i].x)
         .attr("cy", gridCoords[i].y)
         .attr("r", objectsAppearance[i].size)
@@ -290,29 +291,30 @@ var displayShapes = function() {
   }
 
   if( visualVariable=="Motion"){
-    console.log("in motion loop");
     const motion = () => {
-      let circles = svgElement.selectAll('[id*=shapes');
-      // d3.select(circles[i])
+      let circles = svgElement.selectAll('[id*=circleShape');
+      //console.log(circles.size())
       circles
-        .transition()
-        .duration(100)
-        .attrTween('transform', tween(1))
-        .delay(20)
-        .transition()
-        .duration(100)
-        .attrTween('transform',tween(0))
-        .on('end', motion);
-    }
+          .transition()
+          .ease(d3.easeCubicOut)
+          .ease(d3.easeCubicIn)
+          //.duration(300)
+          .delay(20)
+          .attrTween("transform", function(){
+            return d3.interpolateString( `translateY(0,-5px)`, `translate(0,5)` );
+          })
+          .transition()
+          .ease(d3.easeCubicIn)
+          .ease(d3.easeCubicOut)
+          //.duration(300)
+          .delay(20)
+          .attrTween("transform", function(){
+            return d3.interpolateString( `translateY(0,5px)`, `translate(0,-5)` );
+          })
+          .on("end", motion);
+          }
+    
     motion();
-    function tween(direction) {
-      const circle=this;
-      if (!(this instanceof Node)) {
-          return;
-      }
-      if(direction>0) return d3.interpolateString('translate(' + (circle.cy + circle.motion) + ')')
-      else return d3.interpolateString('translate(' + (circle.cy - circle.motion) + ')');
-    }
   }
 }
 
