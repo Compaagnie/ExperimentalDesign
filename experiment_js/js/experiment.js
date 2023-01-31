@@ -105,8 +105,27 @@ var startExperiment = function(event) {
 
 }
 
+var nextBlock = function(){
+  ctx.cpt=startTrial;
+  d3.select("#shapes").remove();
+  d3.select("#placeholders").remove();
+  d3.select("#instructions").remove();
+  selectValue = d3.select("#blockSel").property("value");
+  if(selectValue==3){selectValue=0;}
+  if(selectValue==startBlock){
+    //could set new participant here
+    return;
+  }
+  setBlock(selectValue+1);
+}
+
 var nextTrial = function() {
   ctx.cpt++;
+  if( ctx.cpt>ctx.trials.length){
+    nextBlock();
+  }
+  selectValue = d3.select("#trialSel").property("value");
+  setTrial(selectValue+1);
   displayInstructions();
 }
 
