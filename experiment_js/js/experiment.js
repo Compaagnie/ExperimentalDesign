@@ -387,7 +387,7 @@ var displayPlaceholders = function() {
           d3.select("#placeholders").remove();
           if ( this.id == ctx.targetIndex){
             //record time
-            displayInstructions();
+            nextTrial();
           }
           else{
             //if wrong, increase error count and redo condition
