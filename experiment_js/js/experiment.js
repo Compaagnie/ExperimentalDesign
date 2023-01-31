@@ -313,7 +313,15 @@ var displayShapes = function() {
   // display all objects by adding actual SVG shapes
   for (var i = 0; i < objectCount; i++) {
     // console.log(objectsAppearance[i].shadow);
-    if (objectsAppearance[i].shadow == shadowIntensity[1]){
+    if (objectsAppearance[i].shadow == shadowIntensity[1] && objectsAppearance[i].motion == motionShift[1]) {
+      group.append("circle")
+      .attr("id", "circleShape")
+      .attr("cx", gridCoords[i].x)
+      .attr("cy", gridCoords[i].y)
+      .attr("r", objectsAppearance[i].size)
+      .attr("fill", objectsAppearance[i].color)
+      .attr("filter", "url(#dropshadow)");
+    } else if (objectsAppearance[i].shadow == shadowIntensity[1]){
       group.append("circle")
       .attr("cx", gridCoords[i].x)
       .attr("cy", gridCoords[i].y)
