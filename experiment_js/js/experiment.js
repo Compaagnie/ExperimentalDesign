@@ -22,7 +22,7 @@ var ctx = {
   blockIndex: (touchstone == 1 ? "Block" : "Block1"),
   trialIndex: (touchstone == 1 ? "Trial" : "TrialID"),
   vvIndex:"VV",
-  objectsCountIndex:"NE",
+  objectsCountIndex:"OC",
 
   state:state.NONE,
   targetIndex:0,
@@ -145,7 +145,8 @@ var displayShapes = function() {
 
   var visualVariable = ctx.trials[ctx.cpt]["VV"];
   console.log(visualVariable);
-  var oc = ctx.trials[ctx.cpt]["NE"];
+  var oc = ctx.trials[ctx.cpt]["OC"];
+  console.log(oc);
   if(oc === "Low") {
     objectCount = 9;
   } else if(oc === "Medium") {
@@ -346,7 +347,7 @@ var displayPlaceholders = function() {
   var oc = ctx.trials[ctx.cpt]["OC"];
   var objectCount = 0;
 
-  if(oc === "Small") {
+  if(oc === "Low") {
     objectCount = 9;
   } else if(oc === "Medium") {
     objectCount = 25;
