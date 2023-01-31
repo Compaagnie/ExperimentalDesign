@@ -227,8 +227,10 @@ var displayShapes = function() {
       targetMotion=motionShift[Math.floor(Math.random()*motionShift.length)];
       break;
     case "Both":
-      motionIndex = 1;
+      targetShadow = shadowIntensity[Math.floor(Math.random()*shadowIntensity.length)];
       shadowIndex = 1;
+      motionIndex = 1;
+      targetMotion=motionShift[Math.floor(Math.random()*motionShift.length)];
       break;
     default:
       break;
@@ -241,7 +243,7 @@ var displayShapes = function() {
         tmpShadow = shadowIntensity[Math.floor(Math.random()*shadowIntensity.length)];
         tmpMotion = motionShift[Math.floor(Math.random()*motionShift.length)];
         if (tmpMotion == targetMotion && tmpShadow == targetShadow){
-          if(~~Math.random()) {
+          if(Math.floor(Math.random()*2)) {
             tmpMotion = targetMotion*(-1)+motionShift[motionIndex];
           } else {
             tmpShadow = targetShadow*(-1)+shadowIntensity[shadowIndex];
