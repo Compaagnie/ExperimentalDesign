@@ -146,14 +146,12 @@ var displayShapes = function() {
   var visualVariable = ctx.trials[ctx.cpt]["VV"];
   console.log(visualVariable);
   var oc = ctx.trials[ctx.cpt]["OC"];
+  console.log(oc);
   if(oc === "Low") {
-    console.log("low");
     objectCount = 9;
   } else if(oc === "Medium") {
-    console.log("med");
     objectCount = 25;
   } else {
-    console.log("high");
     objectCount = 49;
   }
   console.log("display shapes for condition "+oc+","+visualVariable);
@@ -351,7 +349,7 @@ var displayPlaceholders = function() {
   var oc = ctx.trials[ctx.cpt]["OC"];
   var objectCount = 0;
 
-  if(oc === "Small") {
+  if(oc === "Low") {
     objectCount = 9;
   } else if(oc === "Medium") {
     objectCount = 25;
