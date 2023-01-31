@@ -314,7 +314,7 @@ var displayShapes = function() {
     }
   }
 
-  if( visualVariable=="Motion"){
+  if( visualVariable!="Shadow"){
     const motion = () => {
       let circles = svgElement.selectAll('[id*=circleShape');
       //console.log(circles.size())
