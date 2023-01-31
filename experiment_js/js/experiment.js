@@ -147,10 +147,13 @@ var displayShapes = function() {
   console.log(visualVariable);
   var oc = ctx.trials[ctx.cpt]["OC"];
   if(oc === "Low") {
+    console.log("low");
     objectCount = 9;
   } else if(oc === "Medium") {
+    console.log("med");
     objectCount = 25;
   } else {
+    console.log("high");
     objectCount = 49;
   }
   console.log("display shapes for condition "+oc+","+visualVariable);
@@ -296,18 +299,16 @@ var displayShapes = function() {
       //console.log(circles.size())
       circles
           .transition()
-          .ease(d3.easeCubicOut)
-          .ease(d3.easeCubicIn)
-          //.duration(300)
-          .delay(20)
+          .duration(300)
+          .delay(function(d) {
+            return Math.random() * 1000;
+           })
           .attrTween("transform", function(){
             return d3.interpolateString( `translateY(0,-5px)`, `translate(0,5)` );
           })
           .transition()
-          .ease(d3.easeCubicIn)
-          .ease(d3.easeCubicOut)
-          //.duration(300)
-          .delay(20)
+          .duration(300)
+          .delay(300)
           .attrTween("transform", function(){
             return d3.interpolateString( `translateY(0,5px)`, `translate(0,-5)` );
           })
