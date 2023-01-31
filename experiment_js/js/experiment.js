@@ -200,7 +200,7 @@ var displayShapes = function() {
   // In my example, it means deciding on its size (large or small) and its color (light or dark)
   var randomNumber1 = Math.random();
   var randomNumber2 = Math.random();
-  var targetSize, targetColor, targetShadow, targetMotion;
+  var targetSize, targetColor, targetShadow, targetMotion, tmpShadow, tmpMotion;
   if(randomNumber1 > 0.5) {
     targetSize = 25; // target is large
   } else {
@@ -214,18 +214,20 @@ var displayShapes = function() {
 
   switch (visualVariable) {
     case "Shadow":
-      targetShadow = shadowIntensity[~~Math.random()*shadowIntensity.length];
-      shadowIndex=1;
-      motionIndex=0;
-      targetMotion=0;
+      targetShadow = shadowIntensity[Math.floor(Math.random()*shadowIntensity.length)];
+      shadowIndex = 1;
+      motionIndex = 0;
+      targetMotion = 0;
       break;
     case "Motion":
-      targetShadow=0;
-      shadowIndex=0;
-      motionIndex=1;
-      targetMotion=motionShift[~~Math.random()*motionShift.length];
+      targetShadow = 0;
+      shadowIndex = 0;
+      motionIndex = 1;
+      targetMotion=motionShift[Math.floor(Math.random()*motionShift.length)];
       break;
     case "Both":
+      motionIndex = 1;
+      shadowIndex = 1;
       break;
     default:
       break;
@@ -233,12 +235,34 @@ var displayShapes = function() {
   // 2. Set the visual appearance of all other objects now that the target appearance is decided
   var objectsAppearance = [];
   for (var i = 0; i < objectCount-1; i++) {
-    objectsAppearance.push({
-      size: targetSize, 
-      color: targetColor, 
-      shadow: targetShadow*(-1)+shadowIntensity[shadowIndex], 
-      motion: targetMotion*(-1)+motionShift[motionIndex]
-    })
+    switch (visualVariable){
+      case "Both":
+        tmpShadow = shadowIntensity[Math.floor(Math.random()*shadowIntensity.length)];
+        tmpMotion = motionShift[Math.floor(Math.random()*motionShift.length)];
+        if (tmpMotion == targetMotion && tmpShadow == targetShadow){
+          if(~~Math.random()) {
+            tmpMotion = targetMotion*(-1)+motionShift[motionIndex];
+          } else {
+            tmpShadow = targetShadow*(-1)+shadowIntensity[shadowIndex];
+          }
+        }
+        objectsAppearance.push({
+          size: targetSize, 
+          color: targetColor, 
+          shadow: tmpShadow, 
+          motion: tmpMotion
+        });
+        break;
+      default:
+        objectsAppearance.push({
+          size: targetSize, 
+          color: targetColor, 
+          shadow: targetShadow*(-1)+shadowIntensity[shadowIndex], 
+          motion: targetMotion*(-1)+motionShift[motionIndex]
+        });
+        break;
+    }
+    
     /*
     if(targetSize == 25) {
       objectsAppearance.push({
@@ -360,14 +384,9 @@ var displayPlaceholders = function() {
             //if wrong, increase error count and redo condition
             displayShapes();
           }
-          
-         
-          
         }
       );
-
   }
-
 }
 
 var keyListener = function(event) {
@@ -380,7 +399,6 @@ var keyListener = function(event) {
     d3.select("#shapes").remove();
     displayPlaceholders();
   }
-
 }
 
 
