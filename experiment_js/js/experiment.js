@@ -105,8 +105,27 @@ var startExperiment = function(event) {
 
 }
 
+var nextBlock = function(){
+  ctx.cpt=startTrial;
+  d3.select("#shapes").remove();
+  d3.select("#placeholders").remove();
+  d3.select("#instructions").remove();
+  selectValue = d3.select("#blockSel").property("value");
+  if(selectValue==3){selectValue=0;}
+  if(selectValue==startBlock){
+    //could set new participant here
+    return;
+  }
+  setBlock(selectValue+1);
+}
+
 var nextTrial = function() {
   ctx.cpt++;
+  if( ctx.cpt>ctx.trials.length){
+    nextBlock();
+  }
+  selectValue = d3.select("#trialSel").property("value");
+  setTrial(selectValue+1);
   displayInstructions();
 }
 
@@ -146,7 +165,7 @@ var displayShapes = function() {
   
 
   var visualVariable = ctx.trials[ctx.cpt]["VV"];
-  console.log(visualVariable);
+  // console.log(visualVariable);
   var oc = ctx.trials[ctx.cpt]["OC"];
   console.log(oc);
   if(oc === "Low") {
@@ -295,21 +314,21 @@ var displayShapes = function() {
   }
 
   if( visualVariable!="Shadow"){
+    let circles = svgElement.selectAll('[id*=circleShape');
+    let durationTimes = Array.from({length: circles.size()}, () => Math.floor(Math.random() * 300+50));
     const motion = () => {
-      let circles = svgElement.selectAll('[id*=circleShape');
-      //console.log(circles.size())
+      // console.log(durationTimes);
+      // console.log(circles.size())
       circles
           .transition()
-          .duration(300)
-          .delay(function(d) {
-            return Math.random() * 1000;
-           })
+          .duration(function(d,i){ return durationTimes[i]})
+          .delay(100)
           .attrTween("transform", function(){
             return d3.interpolateString( `translateY(0,-5px)`, `translate(0,5)` );
           })
           .transition()
-          .duration(300)
-          .delay(300)
+          .duration(function(d,i){return durationTimes[i]})
+          .delay(function(d,i){return durationTimes[i]})
           .attrTween("transform", function(){
             return d3.interpolateString( `translateY(0,5px)`, `translate(0,-5)` );
           })
