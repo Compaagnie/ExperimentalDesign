@@ -16,6 +16,8 @@ var ctx = {
   startBlock: 1,
   startTrial: 1,
   cpt: 1,
+  currentSearchTime: 0,
+  errorCount:0,
 
   participantIndex:touchstone == 1 ? "Participant" : "ParticipantID",
   practiceIndex:"Practice",
@@ -78,6 +80,10 @@ var loadData = function(svgEl){
 var startExperiment = function(event) {
   event.preventDefault();
 
+  d3.select("#shapes").remove();
+  d3.select("#placeholders").remove();
+  d3.select("#instructions").remove();
+
   // set the trial counter to the first trial to run
   // ctx.participant, ctx.startBlock and ctx.startTrial contain values selected in combo boxes
 
@@ -111,8 +117,8 @@ var nextBlock = function(){
   d3.select("#placeholders").remove();
   d3.select("#instructions").remove();
   selectValue = d3.select("#blockSel").property("value");
-  if(selectValue==3){selectValue=0;}
-  if(selectValue==startBlock){
+  if(selectValue==3){
+    setParticipant(cpt.participantID+1);
     //could set new participant here
     return;
   }
@@ -120,6 +126,8 @@ var nextBlock = function(){
 }
 
 var nextTrial = function() {
+  ctx.currentSearchTime=0;
+  ctx.errorCount=0;
   ctx.cpt++;
   if( ctx.cpt>ctx.trials.length){
     nextBlock();
@@ -346,14 +354,14 @@ var displayShapes = function() {
 
   if( visualVariable!="Shadow"){
     let circles = svgElement.selectAll('[id*=circleShape');
-    let durationTimes = Array.from({length: circles.size()}, () => Math.floor(Math.random() * 300+50));
+    let durationTimes = Array.from({length: circles.size()}, () => 300);
     const motion = () => {
       // console.log(durationTimes);
       // console.log(circles.size())
       circles
           .transition()
           .duration(function(d,i){ return durationTimes[i]})
-          .delay(100)
+          .delay(300)
           .attrTween("transform", function(){
             return d3.interpolateString( `translateY(0,-5px)`, `translate(0,5)` );
           })
@@ -405,12 +413,18 @@ var displayPlaceholders = function() {
           console.log(this.id);
           d3.select("#placeholders").remove();
           if ( this.id == ctx.targetIndex){
-            //record time
+            var tmpLog = ctx.trials[ctx.cpt];
+            tmpLog["VisualSearchTime"] = ctx.currentSearchTime;
+            tmpLog["ErrorCount"] = ctx.errorCount;
+            ctx.loggedTrials.push(Object.keys(tmpLog).map(function(key){return tmpLog[key];}));
             nextTrial();
           }
           else{
             //if wrong, increase error count and redo condition
-            displayShapes();
+            //remove last time recording
+            ctx.errorCount++;
+            ctx.currentSearchTime = 0;
+            displayInstructions();
           }
         }
       );
@@ -421,9 +435,11 @@ var keyListener = function(event) {
   event.preventDefault();
 
   if(ctx.state == state.INSTRUCTIONS && event.code == "Enter") {
+    ctx.currentSearchTime=Date.now();
     d3.select("#instructions").remove();
     displayShapes();
   } else if(ctx.state == state.SHAPES && event.code == "Space") {
+    ctx.currentSearchTime=Date.now()- ctx.currentSearchTime;
     d3.select("#shapes").remove();
     displayPlaceholders();
   }
@@ -455,7 +471,7 @@ function gridCoordinates(objectCount, cellSize) {
   for (var i = 0; i < objectCount; i++) {
     coords.push({
       x:i%gridSide * cellSize,
-      y:Math.floor(i/gridSide) * cellSize
+      y:Math.floor(i/gridSide) * cellSize + 25*((i%gridSide)%2)
     });
   }
   return coords;
@@ -547,6 +563,9 @@ var setParticipant = function(participantID) {
     .text(function (d) { return d; });
 
   setBlock(options[0]);
+  if (ctx.loggedTrials.length>1)
+    downloadLogs();
+  startExperiment();
 
 };
 
