@@ -22,7 +22,7 @@ var ctx = {
   participantIndex:touchstone == 1 ? "Participant" : "ParticipantID",
   practiceIndex:"Practice",
   blockIndex: (touchstone == 1 ? "Block" : "Block1"),
-  trialIndex: (touchstone == 1 ? "Trial" : "TrialID"),
+  trialIndex: (touchstone == 1 ? "Trial" : "Block2"),
   vvIndex:"VV",
   objectsCountIndex:"OC",
 
@@ -86,12 +86,14 @@ var startExperiment = function(event) {
 
   // set the trial counter to the first trial to run
   // ctx.participant, ctx.startBlock and ctx.startTrial contain values selected in combo boxes
-
+  console.log("Before start process");
   for(var i = 0; i < ctx.trials.length; i++) {
     if(ctx.trials[i][ctx.participantIndex] === ctx.participant) {
       if(parseInt(ctx.trials[i][ctx.blockIndex]) == ctx.startBlock
                && (touchstone == 2 || ctx.trials[i][ctx.practiceIndex].toLowerCase() === "false")) {
         if(parseInt(ctx.trials[i][ctx.trialIndex]) == ctx.startTrial) {
+          console.log("trial found");
+
           ctx.cpt = i - 1;
 
           if(touchstone == 1) { // include practice trials before this trial for TouchStone 1
@@ -108,11 +110,11 @@ var startExperiment = function(event) {
       }
     }
   }
-
 }
 
 var nextBlock = function(){
-  ctx.cpt=startTrial;
+  ctx.cpt=ctx.startTrial;
+  console.log(ctx.cpt);
   d3.select("#shapes").remove();
   d3.select("#placeholders").remove();
   d3.select("#instructions").remove();
@@ -139,11 +141,15 @@ var nextTrial = function() {
 
 var displayInstructions = function() {
   ctx.state = state.INSTRUCTIONS;
-
+  let trialProgress="Trial "+(ctx.cpt+1)%15+"/15";
   d3.select("#instructionsCanvas")
     .append("div")
     .attr("id", "instructions")
     .classed("instr", true);
+    
+  d3.select("#instructions")
+    .append("p")
+    .html(trialProgress);
 
   d3.select("#instructions")
     .append("p")
@@ -512,6 +518,7 @@ var createScene = function(){
 
 var setTrial = function(trialID) {
   ctx.startTrial = parseInt(trialID);
+  console.log("block: " + ctx.startBlock + " trial: " + ctx.startTrial);
 }
 
 var setBlock = function(blockID) {
@@ -538,8 +545,10 @@ var setBlock = function(blockID) {
     .enter()
     .append("option")
     .text(function (d) { return d; });
-
-  setTrial(options[0]);
+    
+    var selEl = document.getElementById("trialSel");
+    selEl.options[0].selected = true;
+    selEl.onchange();
 
 }
 
@@ -595,4 +604,5 @@ function onchangeTrial() {
   d3.select("#placeholders").remove();
   d3.select("#instructions").remove();
   setTrial(selectValue);
+
 };
