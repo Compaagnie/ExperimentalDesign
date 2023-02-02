@@ -136,12 +136,14 @@ var displayInstructions = function() {
 
 }
 
+const shadowIntensity = [0,0.5];
+const motionShift= [0,10];
+
 var displayShapes = function() {
   ctx.state = state.SHAPES;
   var shadowIndex =1;
   var motionIndex =1;
-  const shadowIntensity = [0,0.5];
-  const motionShift= [0,10];
+  
 
   var visualVariable = ctx.trials[ctx.cpt]["VV"];
   console.log(visualVariable);
@@ -158,40 +160,7 @@ var displayShapes = function() {
 
   var svgElement = d3.select("svg");
 
-  // filter stuff                       http://4waisenkinder.de/blog/2013/09/28/using-gradient-and-shadows-with-d3-dot-js/
-  /* For the shadow filter... */
-  // everything that will be referenced
-  // should be defined inside of a <defs> element ;)
-  var defs = svgElement.append( 'defs' );
 
-  // append filter element
-  var filter = defs.append( 'filter' )
-                  .attr( 'id', 'dropshadow' ) /// !!! important - define id to reference it later
-
-  // append gaussian blur to filter
-  filter.append( 'feGaussianBlur' )
-        .attr( 'in', 'SourceAlpha' )
-        .attr( 'stdDeviation', shadowIntensity[1] ) // !!! important parameter - blur
-        .attr( 'result', 'blur' );
-
-  // append offset filter to result of gaussion blur filter
-  filter.append( 'feOffset' )
-        .attr( 'in', 'blur' )
-        .attr( 'dx', 2 ) // !!! important parameter - x-offset
-        .attr( 'dy', 3 ) // !!! important parameter - y-offset
-        .attr( 'result', 'offsetBlur' );
-
-  // merge result with original image
-  var feMerge = filter.append( 'feMerge' );
-
-  // first layer result of blur and offset
-  feMerge.append( 'feMergeNode' )
-        .attr( 'in", "offsetBlur' )
-
-  // original image on top
-  feMerge.append( 'feMergeNode' )
-        .attr( 'in', 'SourceGraphic' );
-  // end filter stuff
 
   var group = svgElement.append("g")
   .attr("id", "shapes")
@@ -464,6 +433,41 @@ var createScene = function(){
   .classed("centered", true);
 
   loadData(svgEl);
+
+  // filter stuff                       http://4waisenkinder.de/blog/2013/09/28/using-gradient-and-shadows-with-d3-dot-js/
+  /* For the shadow filter... */
+  // everything that will be referenced
+  // should be defined inside of a <defs> element ;)
+  var defs = svgEl.append( 'defs' );
+
+  // append filter element
+  var filter = defs.append( 'filter' )
+                  .attr( 'id', 'dropshadow' ) /// !!! important - define id to reference it later
+
+  // append gaussian blur to filter
+  filter.append( 'feGaussianBlur' )
+        .attr( 'in', 'SourceAlpha' )
+        .attr( 'stdDeviation', shadowIntensity[1] ) // !!! important parameter - blur
+        .attr( 'result', 'blur' );
+
+  // append offset filter to result of gaussion blur filter
+  filter.append( 'feOffset' )
+        .attr( 'in', 'blur' )
+        .attr( 'dx', 2 ) // !!! important parameter - x-offset
+        .attr( 'dy', 3 ) // !!! important parameter - y-offset
+        .attr( 'result', 'offsetBlur' );
+
+  // merge result with original image
+  var feMerge = filter.append( 'feMerge' );
+
+  // first layer result of blur and offset
+  feMerge.append( 'feMergeNode' )
+        .attr( 'in", "offsetBlur' )
+
+  // original image on top
+  feMerge.append( 'feMergeNode' )
+        .attr( 'in', 'SourceGraphic' );
+  // end filter stuff
 };
 
 
