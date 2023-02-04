@@ -35,7 +35,7 @@ var ctx = {
   loggedTrials:
     touchstone == 1 ?
     [["Participant","Practice","Block","Trial","VV","OC","visualSearchTime","ErrorCount"]] :
-    [["DesignName","ParticipantID","TrialID","Block1","Trial","VV","OC","visualSearchTime","ErrorCount"]]
+    [["DesignName","ParticipantID","TrialID","Block1","Block2","VV","OC","visualSearchTime","ErrorCount"]]
 };
 
 /****************************************/
@@ -260,15 +260,25 @@ var displayShapes = function() {
   for (var i = 0; i < objectCount-1; i++) {
     switch (visualVariable){
       case "Both":
-        tmpShadow = shadowIntensity[Math.floor(Math.random()*shadowIntensity.length)];
-        tmpMotion = motionShift[Math.floor(Math.random()*motionShift.length)];
-        if (tmpMotion == targetMotion && tmpShadow == targetShadow){
-          if(Math.floor(Math.random()*2)) {
-            tmpMotion = targetMotion*(-1)+motionShift[motionIndex];
-          } else {
-            tmpShadow = targetShadow*(-1)+shadowIntensity[shadowIndex];
-          }
+        if(i<(objectCount-1)/3){
+          tmpMotion = targetMotion*(-1)+motionShift[motionIndex];
+          tmpShadow = targetShadow;
+        } else if (i<2*(objectCount-1)/3){
+          tmpMotion = targetMotion;
+          tmpShadow = targetShadow*(-1)+shadowIntensity[shadowIndex];
+        } else {
+          tmpMotion = targetMotion*(-1)+motionShift[motionIndex];
+          tmpShadow = targetShadow*(-1)+shadowIntensity[shadowIndex];
         }
+        // tmpShadow = shadowIntensity[Math.floor(Math.random()*shadowIntensity.length)];
+        // tmpMotion = motionShift[Math.floor(Math.random()*motionShift.length)];
+        // if (tmpMotion == targetMotion && tmpShadow == targetShadow){
+        //   if(Math.floor(Math.random()*2)) {
+        //     tmpMotion = targetMotion*(-1)+motionShift[motionIndex];
+        //   } else {
+        //     tmpShadow = targetShadow*(-1)+shadowIntensity[shadowIndex];
+        //   }
+        // }
         objectsAppearance.push({
           size: targetSize, 
           color: targetColor, 
