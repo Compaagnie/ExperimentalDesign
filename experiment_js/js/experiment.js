@@ -120,7 +120,7 @@ var nextBlock = function(){
   d3.select("#instructions").remove();
   selectValue = d3.select("#blockSel").property("value");
   if(selectValue==3){
-    setParticipant(cpt.participantID+1);
+    setParticipant(cpt.participant+1);
     //could set new participant here
     return;
   }
@@ -139,9 +139,27 @@ var nextTrial = function() {
   displayInstructions();
 }
 
+var displayParticipantChange = function(){
+  ctx.state = state.NONE;
+  let participantMessage="Participant "+ctx.participant;
+  d3.select("#instructionsCanvas")
+    .append("div")
+    .attr("id", "instructions")
+    .classed("instr", true);
+    
+  d3.select("#instructions")
+    .append("p")
+    .html(participantMessage);
+  
+    d3.select("#instructions")
+    .append("p")
+    .html("Press GO when ready to start.");
+
+}
+
 var displayInstructions = function() {
   ctx.state = state.INSTRUCTIONS;
-  let trialProgress="Trial "+(ctx.cpt+1)%15+"/15";
+  let trialProgress="Trial "+ctx.trials[ctx.cpt][ctx.trialIndex]+"/15";
   d3.select("#instructionsCanvas")
     .append("div")
     .attr("id", "instructions")
@@ -578,7 +596,7 @@ var setParticipant = function(participantID) {
   setBlock(options[0]);
   if (ctx.loggedTrials.length>1)
     downloadLogs();
-  startExperiment();
+  displayParticipantChange();
 
 };
 
