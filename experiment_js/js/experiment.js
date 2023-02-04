@@ -22,7 +22,7 @@ var ctx = {
   participantIndex:touchstone == 1 ? "Participant" : "ParticipantID",
   practiceIndex:"Practice",
   blockIndex: (touchstone == 1 ? "Block" : "Block1"),
-  trialIndex: (touchstone == 1 ? "Trial" : "Block2"),
+  trialIndex: (touchstone == 1 ? "Trial" : "TrialID"),
   vvIndex:"VV",
   objectsCountIndex:"OC",
 
@@ -112,30 +112,33 @@ var startExperiment = function(event) {
   }
 }
 
-var nextBlock = function(){
-  ctx.cpt=ctx.startTrial;
+var autoChangeParticipant = function(){
   console.log(ctx.cpt);
-  d3.select("#shapes").remove();
-  d3.select("#placeholders").remove();
-  d3.select("#instructions").remove();
-  selectValue = d3.select("#blockSel").property("value");
-  if(selectValue==3){
-    setParticipant(cpt.participant+1);
+
+  if(ctx.startBlock==3){
+    var tmp = parseInt(ctx.participant)+1;
+    console.log("set participant " + tmp);
+    downloadLogs();
+    document.getElementById("downloadLink").click();
+    setParticipant((parseInt(ctx.participant)+1).toString());
     //could set new participant here
-    return;
+    return true;
   }
-  setBlock(selectValue+1);
+
+  ctx.startBlock++;
+  return false;
 }
 
 var nextTrial = function() {
   ctx.currentSearchTime=0;
   ctx.errorCount=0;
-  ctx.cpt++;
-  if( ctx.cpt>ctx.trials.length){
-    nextBlock();
+  if( ctx.cpt+1 >= 45*(parseInt(ctx.participant)-1) + 15*ctx.startBlock ){
+    console.log("Next block");
+    if (autoChangeParticipant())
+      return;
   }
-  selectValue = d3.select("#trialSel").property("value");
-  setTrial(selectValue+1);
+  ctx.cpt++;
+  console.log("Next trial, loading trial:" + ctx.startBlock + "-" + ctx.cpt)
   displayInstructions();
 }
 
@@ -159,7 +162,7 @@ var displayParticipantChange = function(){
 
 var displayInstructions = function() {
   ctx.state = state.INSTRUCTIONS;
-  let trialProgress="Trial "+ctx.trials[ctx.cpt][ctx.trialIndex]+"/15";
+  let trialProgress="Trial "+ctx.trials[ctx.cpt]["Block2"]+"/15";
   d3.select("#instructionsCanvas")
     .append("div")
     .attr("id", "instructions")
@@ -355,9 +358,15 @@ var displayShapes = function() {
     }
   }
 
-  if( visualVariable!="Shadow"){
+  if( visualVariable != "Shadow"){
     let circles = svgElement.selectAll('[id*=circleShape');
     let durationTimes = Array.from({length: circles.size()}, () => 300);
+    let interpolationDown = function(){
+      return d3.interpolateString( `translateY(0,5px)`, `translate(0,-5)`)
+    };
+    let interpolationUp = function(){
+      return d3.interpolateString( `translateY(0,-5px)`, `translate(0,5)` );
+    }
     const motion = () => {
       // console.log(durationTimes);
       // console.log(circles.size())
@@ -365,15 +374,11 @@ var displayShapes = function() {
           .transition()
           .duration(function(d,i){ return durationTimes[i]})
           .delay(300)
-          .attrTween("transform", function(){
-            return d3.interpolateString( `translateY(0,-5px)`, `translate(0,5)` );
-          })
+          .attrTween("transform", interpolationUp)
           .transition()
           .duration(function(d,i){return durationTimes[i]})
           .delay(function(d,i){return durationTimes[i]})
-          .attrTween("transform", function(){
-            return d3.interpolateString( `translateY(0,5px)`, `translate(0,-5)` );
-          })
+          .attrTween("transform", interpolationDown)
           .on("end", motion);
           }
     
@@ -413,7 +418,7 @@ var displayPlaceholders = function() {
 
     placeholder.on("click",
         function() {
-          console.log(this.id);
+          // console.log("click id" + this.id);
           d3.select("#placeholders").remove();
           if ( this.id == ctx.targetIndex){
             var tmpLog = ctx.trials[ctx.cpt];
@@ -450,7 +455,7 @@ var keyListener = function(event) {
 
 
 var downloadLogs = function(event) {
-  event.preventDefault();
+  //event.preventDefault();
   var csvContent = "data:text/csv;charset=utf-8,";
   console.log("logged lines count: "+ctx.loggedTrials.length);
   ctx.loggedTrials.forEach(function(rowArray){
@@ -461,6 +466,7 @@ var downloadLogs = function(event) {
   var encodedUri = encodeURI(csvContent);
   var downloadLink = d3.select("form")
   .append("a")
+  .attr("id", "downloadLink")
   .attr("href",encodedUri)
   .attr("download","logs_"+ctx.trials[ctx.cpt][ctx.participantIndex]+"_"+Date.now()+".csv")
   .text("logs_"+ctx.trials[ctx.cpt][ctx.participantIndex]+"_"+Date.now()+".csv");
@@ -545,6 +551,11 @@ var createScene = function(){
 /****************************************/
 
 var setTrial = function(trialID) {
+  d3.select("#shapes").remove();
+  d3.select("#placeholders").remove();
+  d3.select("#instructions").remove();
+
+  console.log(trialID)
   ctx.startTrial = parseInt(trialID);
   console.log("block: " + ctx.startBlock + " trial: " + ctx.startTrial);
 }
@@ -560,6 +571,7 @@ var setBlock = function(blockID) {
       if(parseInt(ctx.trials[i][ctx.blockIndex]) == ctx.startBlock) {
         if(!(ctx.trials[i][ctx.trialIndex] === trial)) {
           trial = ctx.trials[i][ctx.trialIndex];
+          console.log(trial);
           options.push(trial);
         }
       }
@@ -574,13 +586,14 @@ var setBlock = function(blockID) {
     .append("option")
     .text(function (d) { return d; });
     
-    var selEl = document.getElementById("trialSel");
-    selEl.options[0].selected = true;
-    selEl.onchange();
-
+    // var selEl = document.getElementById("trialSel");
+    // selEl.options[0].selected = true;
+    // selEl.onchange();
+    setTrial(options[0]);
 }
 
 var setParticipant = function(participantID) {
+  console.log("participantID " + participantID);
   ctx.participant = participantID;
 
   var block = "";
@@ -604,33 +617,25 @@ var setParticipant = function(participantID) {
     .text(function (d) { return d; });
 
   setBlock(options[0]);
-  if (ctx.loggedTrials.length>1)
-    downloadLogs();
   displayParticipantChange();
 
 };
 
 function onchangeParticipant() {
   selectValue = d3.select("#participantSel").property("value");
-  d3.select("#shapes").remove();
-  d3.select("#placeholders").remove();
-  d3.select("#instructions").remove();
   setParticipant(selectValue);
 };
 
 function onchangeBlock() {
   selectValue = d3.select("#blockSel").property("value");
-  d3.select("#shapes").remove();
-  d3.select("#placeholders").remove();
-  d3.select("#instructions").remove();
   setBlock(selectValue);
 };
 
 function onchangeTrial() {
+  selectParticipant = d3.select("#participantSel").property("value");
+  selectBlock = d3.select("#blockSel").property("value");
   selectValue = d3.select("#trialSel").property("value");
-  d3.select("#shapes").remove();
-  d3.select("#placeholders").remove();
-  d3.select("#instructions").remove();
-  setTrial(selectValue);
-
+  
+  //setTrial(selectValue);
+  setTrial(45*(parseInt(selectParticipant)-1)+15*(parseInt(selectBlock)-1)+parseInt(selectValue));
 };
