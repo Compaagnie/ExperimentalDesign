@@ -372,17 +372,19 @@ var displayShapes = function() {
       // console.log(circles.size())
       circles
           .transition()
-          .duration(function(d,i){ return durationTimes[i]})
+          .duration(300)
           .delay(300)
           .attrTween("transform", interpolationUp)
           .transition()
-          .duration(function(d,i){return durationTimes[i]})
-          .delay(function(d,i){return durationTimes[i]})
+          .duration(300)
+          .delay(300)
           .attrTween("transform", interpolationDown)
           .on("end", motion);
           }
+    if(ctx.state==state.SHAPES){
+      motion();
+    }
     
-    motion();
   }
 }
 
