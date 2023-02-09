@@ -379,12 +379,15 @@ var displayShapes = function() {
           .duration(300)
           .delay(300)
           .attrTween("transform", interpolationDown)
-          .on("end", motion);
-          }
-    if(ctx.state==state.SHAPES){
-      motion();
-    }
-    
+          .on("end", function(){
+              if(ctx.state==state.SHAPES){
+                return motion();
+              }
+            }
+          );
+        
+      }
+    motion();
   }
 }
 
