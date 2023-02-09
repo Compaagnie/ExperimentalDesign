@@ -460,7 +460,7 @@ var keyListener = function(event) {
 
 
 var downloadLogs = function(event) {
-  //event.preventDefault();
+  event.preventDefault();
   var csvContent = "data:text/csv;charset=utf-8,";
   console.log("logged lines count: "+ctx.loggedTrials.length);
   ctx.loggedTrials.forEach(function(rowArray){
